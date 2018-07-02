@@ -1,0 +1,5 @@
+Django==2.0.7
+django-configurations==2.0
+django-extensions==2.0.7
+pytz==2018.5
+six==1.11.0
