@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'hydra_notebook.apps.HydraNotebookConfig'
+    'hydra_notebook.apps.HydraNotebookConfig',
+    'hydra_notebook_demo.apps.HydraNotebookDemoConfig'
 ]
 
 MIDDLEWARE = [
@@ -129,6 +130,10 @@ LOGGING = {
         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         # },
         'hydra_notebook': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'hydra_notebook_demo': {
             'handlers': ['console'],
             'level': 'INFO',
         },
