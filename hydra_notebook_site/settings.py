@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 
     'hydra_notebook.apps.HydraNotebookConfig',
     'hydra_notebook_demo.apps.HydraNotebookDemoConfig'
@@ -139,3 +140,13 @@ LOGGING = {
         },
     },
 }
+
+IPYTHON_ARGUMENTS = [
+    '--config', os.path.join(BASE_DIR, 'jupyter.py'),
+    # '--notebook'
+    '--debug',
+]
+
+# SHELL_PLUS = "notebook"
+
+NOTEBOOKS_ROOT = os.path.join(BASE_DIR, 'notebooks')
