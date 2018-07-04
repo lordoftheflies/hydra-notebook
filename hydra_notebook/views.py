@@ -1,4 +1,5 @@
 import io
+import json
 import os
 
 import nbformat
@@ -7,6 +8,9 @@ from django.shortcuts import render
 from nbconvert import HTMLExporter
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.python import PythonLexer
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 formatter = HtmlFormatter()
 lexer = PythonLexer()
@@ -35,3 +39,16 @@ def show_notebook(request, fname):
             'body': body,
             'style': resources['inlining']['css'][0]
         })
+
+
+@api_view(['GET'])
+def list_notebooks_json(request):
+    contents = os.listdir(settings.NOTEBOOKS_ROOT)
+    return Response(contents)
+
+
+@api_view(['GET'])
+def show_notebook_json(request, fname):
+    """display a short summary of the cells of a notebook"""
+    notebook = json.load(os.path.join(settings.NOTEBOOKS_ROOT, fname))
+    return Response(notebook)
