@@ -8,8 +8,9 @@ from django.shortcuts import render
 from nbconvert import HTMLExporter
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.python import PythonLexer
-from rest_framework import viewsets
+from rest_framework import viewsets as rest_viewsets, views as rest_views
 from rest_framework.decorators import api_view
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
 formatter = HtmlFormatter()
@@ -52,3 +53,16 @@ def show_notebook_json(request, fname):
     """display a short summary of the cells of a notebook"""
     notebook = json.load(os.path.join(settings.NOTEBOOKS_ROOT, fname))
     return Response(notebook)
+
+class FileUploadView(rest_views.APIView):
+    parser_classes = (FileUploadParser,)
+
+    def put(self, request, filename, format=None):
+        file_obj = request.data['file']
+        with io.open(file=os.path.join(settings.NOTEBOOKS_ROOT, filename), mode='wb+', encoding='utf-8') as file_handler:
+            for chunk in file_obj.chunks():
+                file_handler.write(chunk)
+        # ...
+        # do some stuff with uploaded file
+        # ...
+        return Response(status=204)
