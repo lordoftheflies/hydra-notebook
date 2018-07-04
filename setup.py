@@ -23,7 +23,7 @@ with open(os.path.join('.', 'README.md')) as readme:
 # Version parsing
 # ========================================
 main_ns = {}
-ver_path = convert_path('muadib/version.py')
+ver_path = convert_path('hydra_notebook/version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
