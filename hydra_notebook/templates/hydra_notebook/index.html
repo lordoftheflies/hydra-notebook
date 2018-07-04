@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ul>
+    {% for notebook in notebooks %}
+    <li>
+        <a href="{% url 'show_notebook' notebook %}">{{ notebook }}</a>
+    </li>
+    {% endfor %}
+</ul>
+</body>
+</html>
