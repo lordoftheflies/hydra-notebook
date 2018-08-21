@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/hydra-notebook.png)](https://badge.fury.io/py/hydra-notebook)
+
 # hydra-notebooks
 
 Jupyter notebooks integration for Django. 
