@@ -150,9 +150,10 @@ class NotebookExecutor(NotebookFileHandler):
 class NotebookBuilder():
 
     def __init__(self, notebook: NotebookNode = None, **kwargs):
-        self.notebook_node = notebook
+        self.notebook_node = notebook # type: NotebookNode
         self.cells = []
         self.kwargs = kwargs
+        self.metadata = dict()
 
     def notebook(self, **kwargs):
         self.notebook_node = nbf.new_notebook(**kwargs)
@@ -168,8 +169,13 @@ class NotebookBuilder():
         self.cells.append(cell)
         return self
 
+    def meta_property(self, name, value):
+        self.metadata[name] = value
+        return self
+
     def build(self) -> NotebookNode:
         if self.notebook_node is None:
             self.notebook_node = self.notebook(**self.kwargs)
+        self.notebook_node['metadata'] = self.metadata
         self.notebook_node['cells'] = self.cells
         return self.notebook_node
