@@ -49,9 +49,12 @@ def list_notebooks_json(request):
 
 
 @api_view(['GET'])
-def show_notebook_json(request, fname):
+def show_notebook_json(request, filename):
+
+    EXTENSION = 'ipynb'
     """display a short summary of the cells of a notebook"""
-    notebook = json.load(os.path.join(settings.NOTEBOOKS_ROOT, fname))
+    with io.open(file=os.path.join(settings.NOTEBOOKS_ROOT, ('%s.%s' % (filename, EXTENSION))), mode='r', encoding='utf-8') as file_handler:
+        notebook = json.load(file_handler)
     return Response(notebook)
 
 class FileUploadView(rest_views.APIView):

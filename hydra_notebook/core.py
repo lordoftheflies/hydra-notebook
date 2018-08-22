@@ -2,9 +2,11 @@ import io, os, sys, types
 
 import nbformat
 from IPython import get_ipython
+from django.conf import settings
 from nbconvert.preprocessors import ExecutePreprocessor
-from nbformat import read
+from nbformat import read, NotebookNode
 from IPython.core.interactiveshell import InteractiveShell
+from nbformat import v4 as nbf
 
 
 def find_notebook(fullname, path=None):
@@ -91,41 +93,83 @@ class NotebookFinder(object):
         return self.loaders[key]
 
 
-class NotebookExecutor(object):
-    """Executor that execute notebooks"""
+class NotebookFileHandler(object):
 
-    def __init__(self, fullname, path=None, extension="ipynb", kernel_name='python3', timeout=600):
+    def __init__(self, fullname, path=None, extension="ipynb"):
         super().__init__()
         self.fullname = fullname
-        self.path = path
+        self.path = settings.NOTEBOOKS_ROOT if path is None else path
         self.extension = extension
-        self.kernel_name = kernel_name
-        self.timeout = timeout
 
     @property
     def notebook_path(self):
         return '%s/%s.%s' % (self.path, self.fullname, self.extension)
 
     def __enter__(self):
-        self.nb = self.read(path=(self.notebook_path))
+        self.nb = self.read()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.write()
 
-    def __call__(self, *args, **kwargs):
-        ep = ExecutePreprocessor(timeout=self.timeout, kernel_name=self.kernel_name)
-        ep.preprocess(self.nb, {'metadata': {'path': '%s/' % self.path}})
+    @property
+    def notebook(self) -> NotebookNode:
+        return self.nb
+
+    @notebook.setter
+    def notebook(self, notebook: NotebookNode):
+        self.nb = notebook
 
     def write(self):
         with open(self.notebook_path, 'wt') as f:
             nbformat.write(self.nb, f)
 
-    def read(self, path):
+    def read(self) -> NotebookNode:
         nb = None
 
-        print("reading Jupyter notebook from %s" % path)
+        print("reading Jupyter notebook from %s" % self.notebook_path)
         # load the notebook object
-        with io.open(path, 'r', encoding='utf-8') as f:
-            nb = read(f, 4)
+        with io.open(self.notebook_path, 'r', encoding='utf-8') as f:
+            nb = read(f, 4)  # type: NotebookNode
         return nb
+
+
+class NotebookExecutor(NotebookFileHandler):
+    """Executor that execute notebooks"""
+
+    def __init__(self, fullname, path=None, extension="ipynb", kernel_name='python3', timeout=600):
+        super().__init__(fullname=fullname, path=path, extension=extension)
+        self.kernel_name = kernel_name
+        self.timeout = timeout
+
+    def __call__(self, *args, **kwargs):
+        ep = ExecutePreprocessor(timeout=self.timeout, kernel_name=self.kernel_name)
+        ep.preprocess(self.nb, {'metadata': {'path': '%s/' % self.path}})
+
+
+class NotebookBuilder():
+
+    def __init__(self, notebook: NotebookNode = None, **kwargs):
+        self.notebook_node = notebook
+        self.cells = []
+        self.kwargs = kwargs
+
+    def notebook(self, **kwargs):
+        self.notebook_node = nbf.new_notebook(**kwargs)
+        return self
+
+    def markdown(self, *text):
+        cell = nbf.new_markdown_cell('\n'.join(text))
+        self.cells.append(cell)
+        return self
+
+    def code(self, *code):
+        cell = nbf.new_code_cell('\n'.join(code))
+        self.cells.append(cell)
+        return self
+
+    def build(self) -> NotebookNode:
+        if self.notebook_node is None:
+            self.notebook_node = self.notebook(**self.kwargs)
+        self.notebook_node['cells'] = self.cells
+        return self.notebook_node

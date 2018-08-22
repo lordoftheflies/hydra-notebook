@@ -24,7 +24,7 @@ urlpatterns = [
     path('show_notebook/<str:fname>/', views.show_notebook, name='show_notebook'),
 
     url(r'^api/$', views.list_notebooks_json, name='list_notebooks_json'),
-    url(r'^api/(?P<fname>\d+)/$', views.show_notebook_json, name='show_notebook_json'),
+    url(r'^api/(?P<filename>[^/]+)$', views.show_notebook_json, name='show_notebook_json'),
     url(r'^api/upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view(), name='upload_notebook_file'),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
