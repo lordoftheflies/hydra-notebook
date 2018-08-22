@@ -100,6 +100,7 @@ class NotebookFileHandler(object):
         self.fullname = fullname
         self.path = settings.NOTEBOOKS_ROOT if path is None else path
         self.extension = extension
+        self.nb = None
 
     @property
     def notebook_path(self):
@@ -125,13 +126,12 @@ class NotebookFileHandler(object):
             nbformat.write(self.nb, f)
 
     def read(self) -> NotebookNode:
-        nb = None
 
         print("reading Jupyter notebook from %s" % self.notebook_path)
         # load the notebook object
         with io.open(self.notebook_path, 'r', encoding='utf-8') as f:
-            nb = read(f, 4)  # type: NotebookNode
-        return nb
+            self.nb = read(f, 4)  # type: NotebookNode
+        return self.nb
 
 
 class NotebookExecutor(NotebookFileHandler):
