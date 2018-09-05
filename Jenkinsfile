@@ -32,8 +32,8 @@ pipeline {
         stage('Cleanup') {
             steps {
                 sh '''. ./env/bin/activate
-                    if [ -d "portalcrawler/dist" ]; then
-                        rm -r portalcrawler/dist
+                    if [ -d "dist" ]; then
+                        rm -r dist
                     fi
                 deactivate'''
             }
@@ -52,7 +52,7 @@ pipeline {
                 sh '''. ./env/bin/activate
                     BUMPED_VERSION=$(cat hydra_notebook/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
                     echo "$BUMPED_VERSION"
-                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch hydra_datastore/version.py
+                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch hydra_notebook/version.py
                 deactivate'''
 
                 sh '''git push origin master'''
