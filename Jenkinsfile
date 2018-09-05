@@ -50,9 +50,9 @@ pipeline {
         stage('Update version') {
             steps {
                 sh '''. ./env/bin/activate
-                    BUMPED_VERSION=$(cat hydra_datastore/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
+                    BUMPED_VERSION=$(cat hydra_notebook/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
                     echo "$BUMPED_VERSION"
-                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of portalcrawler: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch hydra_datastore/version.py
+                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch hydra_datastore/version.py
                 deactivate'''
 
                 sh '''git push origin master'''
