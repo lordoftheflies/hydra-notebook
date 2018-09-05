@@ -45,3 +45,6 @@ class TestHook(TestCase):
         ) as e:
             e()
         # pass
+    #
+    # def test_d(self):
+    #     hydra_notebook.

@@ -20,11 +20,14 @@ from rest_framework import routers
 from . import views
 
 urlpatterns = [
-    path('list_notebooks/', views.list_notebooks, name='list_notebooks'),
-    path('show_notebook/<str:fname>/', views.show_notebook, name='show_notebook'),
+    path('view/native/notebooks/', views.list_notebooks, name='list_notebooks'),
+    path('view/native/notebook/<str:name>/', views.notebook_html, name='show_notebook'),
 
-    url(r'^api/$', views.list_notebooks_json, name='list_notebooks_json'),
-    url(r'^api/(?P<filename>[^/]+)$', views.show_notebook_json, name='show_notebook_json'),
-    url(r'^api/upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view(), name='upload_notebook_file'),
+    path('script/native/notebook/<str:name>/', views.notebook_script, name='notebook_script'),
+    path('script/native/notebook/download/<str:name>/', views.notebook_script_download, name='notebook_script_download'),
+
+    url(r'^api/native/notebooks/$', views.list_notebooks_json, name='list_notebooks_json'),
+    url(r'^api/native/notebook/(?P<name>[^/]+)$', views.show_notebook_json, name='show_notebook_json'),
+    url(r'^api/native/notebook/upload/(?P<filename>[^/]+)$', views.FileUploadView.as_view(), name='upload_notebook_file'),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
