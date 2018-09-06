@@ -184,8 +184,8 @@ class NotebookBuilder():
 class NotebookFileManager():
 
     @classmethod
-    def create(cls):
-        return cls(settings.NOTEBOOKS_ROOT)
+    def create(cls, root=None):
+        return cls(settings.NOTEBOOKS_ROOT if root is None else root)
 
     def __init__(self, root) -> None:
         self.root = root
