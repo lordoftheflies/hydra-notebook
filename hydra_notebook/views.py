@@ -14,18 +14,16 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
-from hydra_notebook.core import NotebookFileModel
+from hydra_notebook.core import NotebookFileModel, NotebookFileManager
 
 formatter = HtmlFormatter()
 lexer = PythonLexer()
 
-
-
-
+notebook_manager = NotebookFileManager.create()
 
 def list_notebooks(request):
     return render(request, template_name='hydra_notebook/index.html', context={
-        'notebooks': NotebookFileModel.objects.all()
+        'notebooks': notebook_manager.all()
     })
 
 
