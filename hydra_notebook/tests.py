@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 # Create your tests here.
-from .core import NotebookBuilder, NotebookFileHandler
+from .core import NotebookBuilder, NotebookFileHandler, NotebookFileModel, NotebookFileManager
 
 
 class NotebookBuilderTestCase(TestCase):
@@ -36,3 +36,18 @@ class NotebookBuilderTestCase(TestCase):
         fh.notebook = nb
 
         fh.write()
+
+class NotebookFileManagerTestCase(TestCase):
+
+    def setUp(self):
+        self.manager = NotebookFileManager()
+
+    def test_all(self):
+        notebooks = self.manager.all()
+        self.assertEqual(len(notebooks), 3)
+
+    def test_get(self):
+        notebook = self.manager.get('test_notebook')
+        self.assertEqual(notebook.filename, 'test_notebook.ipynb')
+
+    

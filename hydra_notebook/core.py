@@ -3,6 +3,7 @@ import io, os, sys, types
 import nbformat
 from IPython import get_ipython
 from django.conf import settings
+from nbconvert import ScriptExporter
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import read, NotebookNode
 from IPython.core.interactiveshell import InteractiveShell
@@ -126,7 +127,6 @@ class NotebookFileHandler(object):
             nbformat.write(self.nb, f)
 
     def read(self) -> NotebookNode:
-
         print("reading Jupyter notebook from %s" % self.notebook_path)
         # load the notebook object
         with io.open(self.notebook_path, 'r', encoding='utf-8') as f:
@@ -150,7 +150,7 @@ class NotebookExecutor(NotebookFileHandler):
 class NotebookBuilder():
 
     def __init__(self, notebook: NotebookNode = None, **kwargs):
-        self.notebook_node = notebook # type: NotebookNode
+        self.notebook_node = notebook  # type: NotebookNode
         self.cells = []
         self.kwargs = kwargs
         self.metadata = dict()
@@ -179,3 +179,66 @@ class NotebookBuilder():
         self.notebook_node['metadata'] = self.metadata
         self.notebook_node['cells'] = self.cells
         return self.notebook_node
+
+
+class NotebookFileManager():
+
+    @property
+    def _files(self):
+        return os.listdir(settings.NOTEBOOKS_ROOT)
+
+    def all(self):
+        notebooks = [NotebookFileModel(filename=file) for file in self._files]
+        return notebooks
+
+    def get(self, name) -> 'NotebookFileModel':
+        matched = [f for f in self._files if f.startswith(name)]
+        return NotebookFileModel(filename=matched[0])
+
+
+class NotebookFileModel:
+    objects = NotebookFileManager()
+
+    def __init__(self, filename=None, name=None, extension=None):
+        self.name = os.path.splitext(filename)[0] if name is None else name
+        self.extension = os.path.splitext(filename)[1] if extension is None else extension
+        self._notebook = None
+        self._script = None
+
+    @property
+    def filename(self):
+        return "%s%s" % (self.name, self.extension)
+
+    @property
+    def notebook(self):
+        if self._notebook is None:
+            self.refresh_notebook()
+        return self.notebook
+
+    @property
+    def script(self):
+        if self._script:
+            self.refresh_script()
+        return self._script
+
+    @property
+    def abspath(self):
+        return os.path.join(settings.NOTEBOOKS_ROOT, self.filename)
+
+    def read(self):
+        with io.open(self.abspath, 'r', encoding='utf-8') as f:
+            notebook = nbformat.read(f, as_version=4)
+        return notebook
+
+    def export(self, exporter=ScriptExporter()):
+        (body, resources) = exporter.from_notebook_node(self.notebook)
+        return dict(
+            body=body,
+            resources=resources
+        )
+
+    def refresh_notebook(self):
+        self._notebook = self.read()
+
+    def refresh_script(self):
+        self._script = self.export()['body']

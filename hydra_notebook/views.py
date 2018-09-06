@@ -14,44 +14,13 @@ from rest_framework.decorators import api_view
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 
+from hydra_notebook.core import NotebookFileModel
+
 formatter = HtmlFormatter()
 lexer = PythonLexer()
 
 
-class NotebookFileManager():
 
-    @property
-    def _files(self):
-        return os.listdir(settings.NOTEBOOKS_ROOT)
-
-    def all(self):
-        notebooks = [NotebookFileModel(filename=file) for file in self._files]
-        return notebooks
-
-    def get(self, name):
-        matched = [f for f in self._files if f.startswith(name)]
-        return NotebookFileModel(filename=matched[0])
-
-
-class NotebookFileModel:
-    objects = NotebookFileManager()
-
-    def __init__(self, filename=None, name=None, extension=None):
-        self.name = os.path.splitext(filename)[0] if name is None else name
-        self.extension = os.path.splitext(filename)[1] if extension is None else extension
-
-    @property
-    def filename(self):
-        return "%s%s" % (self.name, self.extension)
-
-    @property
-    def abspath(self):
-        return os.path.join(settings.NOTEBOOKS_ROOT, self.filename)
-
-    def read(self):
-        with io.open(self.abspath, 'r', encoding='utf-8') as f:
-            notebook = nbformat.read(f, as_version=4)
-        return notebook
 
 
 def list_notebooks(request):
@@ -62,12 +31,13 @@ def list_notebooks(request):
 
 # Create your views here.
 def notebook_html(request, name):
-    notebook = NotebookFileModel(name=name, extension='.ipynb').read()
+    model = NotebookFileModel(name=name, extension='.ipynb')
+
     html_exporter = HTMLExporter()
     html_exporter.template_file = 'full'
 
     # 3. Process the notebook we loaded earlier
-    (body, resources) = html_exporter.from_notebook_node(notebook)
+    (body, resources) = model.export(exporter=html_exporter)
 
     return render(request, template_name='hydra_notebook/detail.html', context={
         'body': body,
@@ -76,26 +46,16 @@ def notebook_html(request, name):
 
 
 def notebook_script(request, name):
-    notebook = NotebookFileModel(name=name, extension='.ipynb').read()
-    html_exporter = ScriptExporter()
-
-    # 3. Process the notebook we loaded earlier
-    (body, resources) = html_exporter.from_notebook_node(notebook)
-
-    return HttpResponse(body)
+    model = NotebookFileModel(name=name, extension='.ipynb')
+    return HttpResponse(model.notebook)
 
 
 def notebook_script_download(request, name):
     model = NotebookFileModel(name=name, extension='.ipynb')
-    notebook = model.read()
-
-    html_exporter = ScriptExporter()
-    (body, resources) = html_exporter.from_notebook_node(notebook)
-
-    response = HttpResponse(body, content_type=notebook['metadata']['language_info']['mimetype'])
+    response = HttpResponse(model.script, content_type=model.notebook['metadata']['language_info']['mimetype'])
     response['Content-Disposition'] = 'attachment; filename=%s%s' % (
         name,
-        notebook['metadata']['language_info']['file_extension'],
+        model.notebook['metadata']['language_info']['file_extension'],
 
     )
     return response
