@@ -183,9 +183,16 @@ class NotebookBuilder():
 
 class NotebookFileManager():
 
+    @classmethod
+    def create(cls):
+        return cls(settings.NOTEBOOKS_ROOT)
+
+    def __init__(self, root) -> None:
+        self.root = root
+
     @property
     def _files(self):
-        return os.listdir(settings.NOTEBOOKS_ROOT)
+        return os.listdir(self.root)
 
     def all(self):
         notebooks = [NotebookFileModel(filename=file) for file in self._files]
@@ -197,7 +204,7 @@ class NotebookFileManager():
 
 
 class NotebookFileModel:
-    objects = NotebookFileManager()
+    objects = NotebookFileManager.create()
 
     def __init__(self, filename=None, name=None, extension=None):
         self.name = os.path.splitext(filename)[0] if name is None else name
@@ -223,7 +230,7 @@ class NotebookFileModel:
 
     @property
     def abspath(self):
-        return os.path.join(settings.NOTEBOOKS_ROOT, self.filename)
+        return os.path.join(self.objects.root, self.filename)
 
     def read(self):
         with io.open(self.abspath, 'r', encoding='utf-8') as f:

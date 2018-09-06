@@ -40,7 +40,7 @@ class NotebookBuilderTestCase(TestCase):
 class NotebookFileManagerTestCase(TestCase):
 
     def setUp(self):
-        self.manager = NotebookFileManager()
+        self.manager = NotebookFileManager.create()
 
     def test_all(self):
         notebooks = self.manager.all()
@@ -50,4 +50,3 @@ class NotebookFileManagerTestCase(TestCase):
         notebook = self.manager.get('test_notebook')
         self.assertEqual(notebook.filename, 'test_notebook.ipynb')
 
-    
