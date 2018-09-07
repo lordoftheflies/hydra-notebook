@@ -50,3 +50,11 @@ class NotebookFileManagerTestCase(TestCase):
         notebook = self.manager.get('test_notebook')
         self.assertEqual(notebook.filename, 'test_notebook.ipynb')
 
+class NotebookFileModelTestCase(TestCase):
+
+    def setUp(self):
+        manager = NotebookFileManager.create()
+        self.notebook = manager.get('test_notebook')
+
+    def test_scriptt(self):
+        self.assertGreater(len(self.notebook.script), 0)

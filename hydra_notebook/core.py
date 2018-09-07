@@ -225,11 +225,11 @@ class NotebookFileModel:
     def notebook(self):
         if self._notebook is None:
             self.refresh_notebook()
-        return self.notebook
+        return self._notebook
 
     @property
     def script(self):
-        if self._script:
+        if self._script is None:
             self.refresh_script()
         return self._script
 
