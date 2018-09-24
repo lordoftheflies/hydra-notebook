@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="0" name="pytest" skips="0" tests="7" time="1.905"><testcase classname="hydra_notebook.tests.NotebookBuilderTestCase" file="hydra_notebook/tests.py" line="9" name="test_build" time="0.22144317626953125"><system-out>Creating test database for alias &apos;default&apos;...
+</system-out></testcase><testcase classname="hydra_notebook.tests.NotebookBuilderTestCase" file="hydra_notebook/tests.py" line="21" name="test_build_with_persistence" time="0.00391697883605957"></testcase><testcase classname="hydra_notebook.tests.NotebookFileManagerTestCase" file="hydra_notebook/tests.py" line="46" name="test_all" time="0.0013916492462158203"></testcase><testcase classname="hydra_notebook.tests.NotebookFileManagerTestCase" file="hydra_notebook/tests.py" line="50" name="test_get" time="0.0024704933166503906"></testcase><testcase classname="hydra_notebook.tests.NotebookFileModelTestCase" file="hydra_notebook/tests.py" line="66" name="test_scriptt" time="0.10146832466125488"></testcase><testcase classname="hydra_notebook_demo.tests.TestHook" file="hydra_notebook_demo/tests.py" line="39" name="test_execute" time="1.4104464054107666"><system-out>/home/lordoftheflies/Documents/cherubits/hydra-notebook
+reading Jupyter notebook from ./notebooks/demo_notebook.ipynb
+</system-out></testcase><testcase classname="hydra_notebook_demo.tests.TestHook" file="hydra_notebook_demo/tests.py" line="13" name="test_module_methods_and_functions" time="0.07912302017211914"><system-out>importing Jupyter notebook from /home/lordoftheflies/Documents/cherubits/hydra-notebook/notebooks/demo_notebook.ipynb
+This is a simple notebook.
+1
+1.0
+hello
+[1, 2, 3]
+(&apos;alma&apos;, &apos;korte&apos;)
+&lt;object object at 0x7f1a8d3d5820&gt;
+{&apos;dinnye&apos;: 10}
+sample_class
+dddd
+execute sample_method
+execute sample_method_with_inoutput(omega, (), {&apos;param_a&apos;: &apos;alfa&apos;, &apos;param_b&apos;: &apos;beta&apos;})
+Destroying test database for alias &apos;default&apos;...
+</system-out></testcase></testsuite>

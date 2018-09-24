@@ -47,8 +47,14 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''. ./env/bin/activate
-                    python manage.py test
+                    pytest --verbose --junit-xml test-reports/results.xml
                 deactivate'''
+            }
+            post {
+                always {
+                    // Archive unit tests for the future
+                    junit allowEmptyResults: true, testResults: 'test-reports/results.xml', fingerprint: true
+                }
             }
         }
 
@@ -56,17 +62,22 @@ pipeline {
             steps {
                 echo "Code Coverage"
                 sh  ''' . ./env/bin/activate
-                        coverage run --source='.' manage.py test ${PYTHON_MODULE_NAME}
-                        python -m coverage xml -o ./reports/coverage.xml
+                        coverage run --source='.' manage.py test ${env.PYTHON_MODULE_NAME}
+                        python -m coverage xml -o ./test-reports/coverage.xml
 
                     '''
+                echo "PEP8 style check"
+                sh  ''' . ./env/bin/activate
+                        pylint --disable=C ${env.PYTHON_MODULE_NAME} || true
+                    '''
+                }
             }
             post{
                 always{
                     step([$class: 'CoberturaPublisher',
                                    autoUpdateHealth: false,
                                    autoUpdateStability: false,
-                                   coberturaReportFile: 'reports/coverage.xml',
+                                   coberturaReportFile: 'test-reports/coverage.xml',
                                    failNoReports: false,
                                    failUnhealthy: false,
                                    failUnstable: false,
@@ -79,9 +90,14 @@ pipeline {
         }
 
         stage('Update version') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 sh '''. ./env/bin/activate
-                    BUMPED_VERSION=$(cat ${PYTHON_MODULE_NAME}/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
+                    BUMPED_VERSION=$(cat ${env.PYTHON_MODULE_NAME}/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
                     echo "$BUMPED_VERSION"
                     bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch ${PYTHON_MODULE_NAME}/version.py
                 deactivate'''
@@ -91,6 +107,11 @@ pipeline {
         }
 
         stage('Build') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 sh '''. ./env/bin/activate
                     python setup.py sdist develop
@@ -99,6 +120,11 @@ pipeline {
         }
 
         stage('Deploy staging') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 sh '''. ./env/bin/activate
                     python setup.py sdist install
@@ -107,6 +133,11 @@ pipeline {
         }
 
         stage('Distribute') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
                 script {
                     try {
