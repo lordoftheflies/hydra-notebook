@@ -62,13 +62,13 @@ pipeline {
             steps {
                 echo "Code Coverage"
                 sh  ''' . ./env/bin/activate
-                        coverage run --source='.' manage.py test ${env.PYTHON_MODULE_NAME}
+                        coverage run --source='.' manage.py test ${PYTHON_MODULE_NAME}
                         python -m coverage xml -o ./test-reports/coverage.xml
 
                     '''
                 echo "PEP8 style check"
                 sh  ''' . ./env/bin/activate
-                        pylint --disable=C ${env.PYTHON_MODULE_NAME} || true
+                        pylint --disable=C ${PYTHON_MODULE_NAME} || true
                     '''
             }
 
