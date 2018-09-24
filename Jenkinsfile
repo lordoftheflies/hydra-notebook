@@ -1,5 +1,10 @@
 pipeline {
     agent any
+
+    environment {
+        PYTHON_MODULE_NAME = 'hydra_notebook'
+    }
+
     stages {
         stage('SCM') {
             steps {
@@ -47,12 +52,38 @@ pipeline {
             }
         }
 
+        stage('Static code metrics') {
+            steps {
+                echo "Code Coverage"
+                sh  ''' . ./env/bin/activate
+                        coverage run --source='.' manage.py test ${PYTHON_MODULE_NAME}
+                        python -m coverage xml -o ./reports/coverage.xml
+
+                    '''
+            }
+            post{
+                always{
+                    step([$class: 'CoberturaPublisher',
+                                   autoUpdateHealth: false,
+                                   autoUpdateStability: false,
+                                   coberturaReportFile: 'reports/coverage.xml',
+                                   failNoReports: false,
+                                   failUnhealthy: false,
+                                   failUnstable: false,
+                                   maxNumberOfBuilds: 10,
+                                   onlyStable: false,
+                                   sourceEncoding: 'ASCII',
+                                   zoomCoverageChart: false])
+                }
+            }
+        }
+
         stage('Update version') {
             steps {
                 sh '''. ./env/bin/activate
-                    BUMPED_VERSION=$(cat hydra_notebook/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
+                    BUMPED_VERSION=$(cat ${PYTHON_MODULE_NAME}/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
                     echo "$BUMPED_VERSION"
-                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch hydra_notebook/version.py
+                    bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch ${PYTHON_MODULE_NAME}/version.py
                 deactivate'''
 
                 sh '''git push origin master'''
@@ -88,7 +119,7 @@ pipeline {
                         echo currentBuild.result
                     }
 
-                    slackSend color: "warning", channel: "#jenkins", message: "Build #${env.BUILD_NUMBER} Deployment Completed - ${env.JOB_NAME} (<https://jenkins.cherubits.hu/blue/organizations/jenkins/gargantula-frontend/detail/master/${env.BUILD_NUMBER}/pipeline|Open>, <https://pypi.cherubits.hu/packages/|Show>)"
+                    slackSend color: "warning", channel: "#jenkins", message: "Build #${env.BUILD_NUMBER} Deployment Completed - ${env.JOB_NAME} (<https://jenkins.cherubits.hu/blue/organizations/jenkins/hydra-notebook/detail/master/${env.BUILD_NUMBER}/pipeline|Open>, <https://pypi.cherubits.hu/packages/|Show>)"
                 }
             }
         }
