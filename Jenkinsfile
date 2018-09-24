@@ -70,8 +70,8 @@ pipeline {
                 sh  ''' . ./env/bin/activate
                         pylint --disable=C ${env.PYTHON_MODULE_NAME} || true
                     '''
-                }
             }
+
             post{
                 always{
                     step([$class: 'CoberturaPublisher',
