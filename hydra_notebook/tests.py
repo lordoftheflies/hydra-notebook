@@ -2,6 +2,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from .core import NotebookBuilder, NotebookFileHandler, NotebookFileModel, NotebookFileManager
+from . import exceptions
 
 
 class NotebookBuilderTestCase(TestCase):
@@ -37,6 +38,7 @@ class NotebookBuilderTestCase(TestCase):
 
         fh.write()
 
+
 class NotebookFileManagerTestCase(TestCase):
 
     def setUp(self):
@@ -49,6 +51,12 @@ class NotebookFileManagerTestCase(TestCase):
     def test_get(self):
         notebook = self.manager.get('test_notebook')
         self.assertEqual(notebook.filename, 'test_notebook.ipynb')
+
+        with self.assertRaises(Exception):
+            self.manager.get(None)
+        with self.assertRaises(exceptions.NotebookNotFindException):
+            self.manager.get('none')
+
 
 class NotebookFileModelTestCase(TestCase):
 
