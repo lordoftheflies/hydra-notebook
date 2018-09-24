@@ -8,6 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import read, NotebookNode
 from IPython.core.interactiveshell import InteractiveShell
 from nbformat import v4 as nbf
+from . import exceptions
 
 
 def find_notebook(fullname, path=None):
@@ -205,9 +206,13 @@ class NotebookFileManager():
         return notebooks
 
     def get(self, name) -> 'NotebookFileModel':
-        matched = [f for f in self._files if f.startswith(name)]
-        return NotebookFileModel(filename=matched[0])
-
+        if name is None:
+            raise Exception('Notebook name is required.')
+        try:
+            matched = [f for f in self._files if f.startswith(name)]
+            return NotebookFileModel(filename=matched[0])
+        except BaseException as e:
+            raise exceptions.NotebookNotFindException(name, e)
 
 class NotebookFileModel:
 
