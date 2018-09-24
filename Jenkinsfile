@@ -97,7 +97,7 @@ pipeline {
             }
             steps {
                 sh '''. ./env/bin/activate
-                    BUMPED_VERSION=$(cat ${env.PYTHON_MODULE_NAME}/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
+                    BUMPED_VERSION=$(cat ${PYTHON_MODULE_NAME}/version.py | grep "__version__ = " | sed 's/__version__ =//' | tr -d "'")
                     echo "$BUMPED_VERSION"
                     bumpversion --allow-dirty --message 'Jenkins Build {$BUILD_NUMBER} bump version of hydra-notebook: {current_version} -> {new_version}' --commit --tag --tag-name 'v{new_version}' --current-version $BUMPED_VERSION patch ${PYTHON_MODULE_NAME}/version.py
                 deactivate'''
